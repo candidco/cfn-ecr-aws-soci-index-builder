@@ -17,6 +17,7 @@ import (
 	"github.com/containerd/containerd/content/local"
 	"github.com/containerd/containerd/images"
 	"github.com/opencontainers/go-digest"
+	"github.com/opencontainers/image-spec/specs-go"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -154,7 +155,7 @@ func TestImagePlatformsArm64Only(t *testing.T) {
 	arm64 := ocispec.Platform{OS: "linux", Architecture: "arm64"}
 	dummyManifestDigest := digest.FromString("dummy-manifest-for-arm64")
 	index := ocispec.Index{
-		Versioned: ocispec.Versioned{SchemaVersion: 2},
+		Versioned: specs.Versioned{SchemaVersion: 2},
 		Manifests: []ocispec.Descriptor{
 			{
 				MediaType: ocispec.MediaTypeImageManifest,
@@ -209,7 +210,7 @@ func TestImagePlatformsEmptyIndex(t *testing.T) {
 	unknown := ocispec.Platform{OS: "unknown", Architecture: "unknown"}
 	dummyDigest := digest.FromString("dummy-attestation")
 	index := ocispec.Index{
-		Versioned: ocispec.Versioned{SchemaVersion: 2},
+		Versioned: specs.Versioned{SchemaVersion: 2},
 		Manifests: []ocispec.Descriptor{
 			{
 				MediaType: "application/vnd.oci.image.manifest.v1+json",
