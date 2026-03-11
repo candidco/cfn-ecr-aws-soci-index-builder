@@ -2,9 +2,6 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - bug/sc-98670/soci-index-build-error
   pull_request:
     branches: [main]
     paths:
@@ -53,8 +50,7 @@ jobs:
     name: Deploy SOCI Index Builder
     runs-on: ubuntu-latest
     needs: [lint, test]
-    # TODO: revert to main only after testing deploy from branch
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/bug/sc-98670/soci-index-build-error')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -79,4 +75,12 @@ jobs:
 
       - name: Deploy cloudformation stack using taskcat
         run: |
+          set +e
           taskcat test run -n
+          exitcode=$?
+          if [ $exitcode -ne 0 ]; then
+            echo ""
+            echo "::error::Deploy failed. The most probable cause is that a CloudFormation stack (or resources with fixed names, e.g. the EventBridge rule) already exists from a previous run. Taskcat does not update existing stacks."
+            echo "→ Delete the existing taskcat-created stack in the target region(s) (e.g. us-east-1), then re-run this workflow."
+            exit $exitcode
+          fi
