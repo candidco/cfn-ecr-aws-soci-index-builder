@@ -6,20 +6,20 @@ on:
       - main
       - bug/sc-98670/soci-index-build-error
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'functions/source/soci-index-generator-lambda/**'
-      - '.github/workflows/ci.yml'
+      - "functions/source/soci-index-generator-lambda/**"
+      - ".github/workflows/ci.yml"
 
 env:
-  GO_VERSION: '1.24'
-  GOLANGCI_LINT_VERSION: '2.1.6'
+  GO_VERSION: "1.24"
+  GOLANGCI_LINT_VERSION: "2.1.6"
 
 jobs:
   lint:
     strategy:
       matrix:
-        working_dir: ['functions/source/soci-index-generator-lambda']
+        working_dir: ["functions/source/soci-index-generator-lambda"]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
@@ -34,14 +34,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: functions/source/soci-index-generator-lambda/go.sum
+
       - name: Download dependencies
         working-directory: ./functions/source/soci-index-generator-lambda
         run: go mod download
+
       - name: Run unit tests
         working-directory: ./functions/source/soci-index-generator-lambda
         run: make test
@@ -58,13 +61,21 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+
       - name: Install taskcat
         run: |
           yq --version
           pip install taskcat
+
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Fix Regions List
+        run: |
+          # Restrict the installation to us-east-1
+          yq eval '.tests.can-deploy.regions = ["us-east-1"]' .taskcat.yml -i
+          cat .taskcat.yml
+
       - name: Deploy cloudformation stack using taskcat
         run: |
-          # Uncomment to run deploy (uses .taskcat.yml from this repo)
-          # taskcat test run -n
+          taskcat test run -n
