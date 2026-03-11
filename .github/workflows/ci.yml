@@ -2,10 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - 'functions/source/soci-index-generator-lambda/**'
-      - '.github/workflows/ci.yml'
+    branches:
+      # - main
+      - bug/sc-98670/soci-index-build-error
+    # paths:
+    #   - 'functions/source/soci-index-generator-lambda/**'
+    #   - '.github/workflows/ci.yml'
   pull_request:
     branches: [ main ]
     paths:
