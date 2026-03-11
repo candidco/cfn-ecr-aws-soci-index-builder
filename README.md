@@ -34,6 +34,15 @@ The version of SOCI index to generate:
 - `V1`: Original SOCI Index format
 - `V2`: Latest SOCI Index format (Recommended)
 
+### Deployment (CI)
+
+Deploy runs on push to `main` and uses taskcat to create the CloudFormation stack. **Taskcat does not update existing stacks**; it creates a new stack per run. If the deploy job fails, the most probable cause is that a stack (or resources with fixed names, e.g. the EventBridge rule) already exists from a previous run. In that case:
+
+1. In the AWS Console (or CLI), delete the existing taskcat-created stack in the region where deploy runs (e.g. `us-east-1`).
+2. Re-run the failed workflow (Actions → select the run → "Re-run all jobs").
+
+After the old stack is removed, the next run can create a fresh stack successfully.
+
 ### Taskcat Configuration
 
 The solution uses taskcat for testing CloudFormation deployments across multiple regions. The `.taskcat.yml` file configurable options:

@@ -337,8 +337,15 @@ func buildIndex(ctx context.Context, dataDir string, sociStore *store.SociStore,
 
 	// Build the SOCI index based on the specified version
 	if sociIndexVersion == "V2" {
-		// Use Convert() for V2 index generation
-		convertedOCIIndex, err := builder.Convert(ctx, image)
+		// Resolve to the platform(s) present in the image so conversion works regardless of host architecture.
+		allPlatforms, err := images.Platforms(ctx, containerdStore, image.Target)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get image platforms: %w", err)
+		}
+		if len(allPlatforms) == 0 {
+			return nil, errors.New("image does not support any runnable platforms")
+		}
+		convertedOCIIndex, err := builder.Convert(ctx, image, soci.ConvertWithPlatforms(allPlatforms...))
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert OCI index: %w", err)
 		}
